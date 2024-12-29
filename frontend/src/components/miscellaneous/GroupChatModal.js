@@ -10,7 +10,7 @@ import {
 import { ChatState } from "../../context/ChatProvider";
 import UserBadgeItem from "../userAvatar/UserBadgeItem";
 import UserListItem from "../userAvatar/UserListItem";
-import { Search, XCircle } from "react-bootstrap-icons";
+import { Search } from "react-bootstrap-icons";
 import axios from "axios";
 
 const GroupChatModal = ({ children }) => {
@@ -43,7 +43,7 @@ const GroupChatModal = ({ children }) => {
       const config = {
         headers: { Authorization: `Bearer ${user.token}` },
       };
-      const { data } = await axios.get(`/api/user?search=${query}`, config);
+      const { data } = await axios.get(`/api/user?search=${search}`, config);
       console.log("data ", data);
       setLoading(false);
       setSearchResult(data);
