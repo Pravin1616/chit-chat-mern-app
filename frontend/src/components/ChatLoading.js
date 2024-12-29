@@ -6,7 +6,7 @@ const ChatLoading = () => {
   return (
     <Stack gap={2} className="p-2">
       {Array.from({ length: 12 }).map((_, index) => (
-        <Placeholder key={index} as="div" animation="wave" className="my-1">
+        <Placeholder key={index} as="div" animation="wave">
           <Placeholder
             xs={12}
             style={{ height: "65px", borderRadius: "5px" }}
