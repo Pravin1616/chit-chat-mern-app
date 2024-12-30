@@ -54,7 +54,7 @@ function Header() {
       const { data } = await axios.get(`/api/user?search=${search}`, config);
 
       setLoading(false);
-      setSearchResult(data);
+      setSearchResult([...data]);
     } catch (error) {
       alert("Error occurred: Failed to load the search results.");
     }
@@ -143,7 +143,6 @@ function Header() {
               Go
             </Button>
           </div>
-
           {/* Search Results */}
           {loading ? (
             <div className="d-flex justify-content-center align-items-center">
@@ -154,7 +153,10 @@ function Header() {
               <UserListItem
                 key={user._id}
                 user={user}
-                handleFunction={() => accessChat(user._id)}
+                handleFunction={() => {
+                  handleClose();
+                  accessChat(user._id);
+                }}
               />
             ))
           )}

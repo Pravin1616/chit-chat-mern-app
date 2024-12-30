@@ -5,7 +5,7 @@
   "scripts": {
     "start": "nodemon backend/server.js",
     "server": "nodemon backend/server.js",
-    "build": "npm install --legacy-peer-deps && npm install --legacy-peer-deps --prefix frontend && npm run build --prefix frontend"
+    "build": "yarn install && npm install --legacy-peer-deps --prefix frontend && npm run build --prefix frontend"
   },
   "author": "Pravin Palanisamy",
   "license": "ISC",

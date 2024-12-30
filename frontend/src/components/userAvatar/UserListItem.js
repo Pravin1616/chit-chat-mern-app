@@ -3,9 +3,7 @@ import { Card, Row, Col } from "react-bootstrap";
 import { PersonCircle } from "react-bootstrap-icons";
 import { ChatState } from "../../context/ChatProvider";
 
-const UserListItem = ({ handleFunction }) => {
-  const { user } = ChatState();
-
+const UserListItem = ({ handleFunction, user }) => {
   return (
     <Card
       onClick={handleFunction}
