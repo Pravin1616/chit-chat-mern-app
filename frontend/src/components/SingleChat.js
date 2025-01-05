@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormControl, InputGroup, Button, Spinner } from "react-bootstrap";
-import { Arrow90degRight } from "react-bootstrap-icons";
+import { Arrow90degRight, Paperclip, XCircleFill } from "react-bootstrap-icons";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import axios from "axios";
 import ProfileModal from "./miscellaneous/ProfileModal";
@@ -22,6 +22,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
+  const [pic, setPic] = useState();
+  const [picLoading, setPicLoading] = useState(false);
   const { addToast } = useToast();
 
   const defaultOptions = {
@@ -62,7 +64,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   };
 
   const sendMessage = async (event) => {
-    if (event.key === "Enter" && newMessage) {
+    if (event.key === "Enter" && (newMessage || pic)) {
       socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
@@ -77,9 +79,11 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           {
             content: newMessage,
             chatId: selectedChat,
+            media: pic || "",
           },
           config
         );
+        setPic("");
         socket.emit("new message", data);
         setMessages([...messages, data]);
       } catch (error) {
@@ -140,6 +144,60 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         setTyping(false);
       }
     }, timerLength);
+  };
+
+  const postDetails = (file) => {
+    setPicLoading(true);
+    if (!file) {
+      addToast("Please select an image.", "warning");
+      setPicLoading(false);
+      return;
+    }
+    const validImageTypes = ["image/jpeg", "image/png"];
+    const validVideoTypes = ["video/mp4", "video/mov", "video/quicktime"];
+
+    if (
+      !validImageTypes.includes(file.type) &&
+      !validVideoTypes.includes(file.type)
+    ) {
+      addToast("Please select a valid image or video file.", "warning");
+      setPicLoading(false);
+      return;
+    }
+    const isImage = validImageTypes.includes(file.type);
+    if (
+      file.type === "image/jpeg" ||
+      file.type === "image/png" ||
+      file.type === "video/mp4" ||
+      file.type === "video/mov" ||
+      file.type === "video/quicktime"
+    ) {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("upload_preset", `chat-app`);
+      data.append("cloud_name", `dppbyu1t2`);
+      fetch(
+        `https://api.cloudinary.com/v1_1/dppbyu1t2/${
+          isImage ? "image" : "video"
+        }/upload`,
+        {
+          method: "post",
+          body: data,
+        }
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setPic(data.url.toString());
+          setPicLoading(false);
+        })
+        .catch((err) => {
+          addToast("Error uploading the image.", "warning");
+          setPicLoading(false);
+        });
+    } else {
+      addToast("Select a valid image", "warning");
+      setPicLoading(false);
+    }
   };
 
   return (
@@ -214,7 +272,10 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               </div>
             )}
 
-            <InputGroup className="mt-3" onKeyDown={sendMessage}>
+            <InputGroup
+              className={`mt-3 ${picLoading ? "pe-none" : ""}`}
+              onKeyDown={sendMessage}
+            >
               <FormControl
                 type="text"
                 placeholder="Enter a message.."
@@ -223,7 +284,76 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 style={{ backgroundColor: "#E0E0E0" }}
                 required
               />
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file.size > 10 * 1024 * 1024) {
+                    addToast("File size should not exceed 10MB.", "warning");
+                    return;
+                  }
+                  postDetails(file);
+                }}
+                style={{ display: "none" }}
+                id="mediaUpload"
+              />
+              <label
+                htmlFor="mediaUpload"
+                style={{ cursor: "pointer", marginLeft: "10px" }}
+              >
+                <Paperclip size={20} />
+              </label>
             </InputGroup>
+            {pic && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  marginLeft: "10px",
+                }}
+              >
+                {pic.startsWith("data:image") ||
+                pic.endsWith(".jpg") ||
+                pic.endsWith(".png") ? (
+                  <img
+                    src={pic}
+                    alt="Preview"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      objectFit: "cover",
+                      borderRadius: "5px",
+                      marginRight: "10px",
+                    }}
+                  />
+                ) : pic.startsWith("data:video") ||
+                  pic.endsWith(".mp4") ||
+                  pic.endsWith(".mov") ? (
+                  <video
+                    src={pic}
+                    alt="Preview"
+                    style={{
+                      width: "100%",
+                      height: "40px",
+                      borderRadius: "5px",
+                      marginRight: "10px",
+                    }}
+                    muted
+                    controls
+                  />
+                ) : null}
+
+                <XCircleFill
+                  style={{
+                    fontSize: "1.5rem",
+                    color: "red",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setPic("")}
+                />
+              </div>
+            )}
           </div>
         </>
       ) : (
@@ -242,7 +372,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
               fontFamily: "Work sans",
             }}
           >
-            Click on a user to start chatting
+            <h2>Welcome! {user.name}</h2>
+            <p>Click on a user to start chatting</p>
           </div>
         </div>
       )}

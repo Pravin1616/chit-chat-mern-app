@@ -6,7 +6,7 @@ const UserBadgeItem = ({ user, handleFunction, admin }) => {
   return (
     <Badge
       pill
-      bg="purple"
+      bg="primary"
       className="m-1 mb-2 d-inline-flex align-items-center cursor-pointer"
       onClick={handleFunction}
       style={{ fontSize: "12px" }}
@@ -14,9 +14,9 @@ const UserBadgeItem = ({ user, handleFunction, admin }) => {
       {user.name}
       {admin === user._id && <span className="ms-1">(Admin)</span>}
       <Button
-        variant="link"
+        variant="light"
         size="sm"
-        className="ms-2 p-0"
+        className="d-flex align-items-center ms-2 p-0"
         onClick={(e) => {
           e.stopPropagation();
           handleFunction();

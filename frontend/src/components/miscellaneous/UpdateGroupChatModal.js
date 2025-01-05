@@ -1,5 +1,5 @@
 import { Modal, Button, Form, Spinner } from "react-bootstrap";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Eye } from "react-bootstrap-icons";
 import axios from "axios";
 import { ChatState } from "../../context/ChatProvider";
@@ -18,6 +18,14 @@ const UpdateGroupChatModal = ({ fetchMessages, fetchAgain, setFetchAgain }) => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+
+  useEffect(() => {
+    if (selectedChat) {
+      setGroupChatName(selectedChat.chatName);
+    } else {
+      setGroupChatName("");
+    }
+  }, [selectedChat]);
 
   const handleSearch = async (query) => {
     setSearch(query);
